@@ -1,7 +1,7 @@
 #app {
     text-align: center;
     color: red;
-    border-bottom: 100px solid black;
+    border-bottom: 10px solid black;
 }
 div {
     background: green;

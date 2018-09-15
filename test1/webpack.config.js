@@ -4,6 +4,10 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
   // JavaScript 执行入口文件
   entry: './main.js',
+  // entry: {
+  //   a: './app.js',
+  //   b: './main.js'
+  // },
   output: {
     // 把所有依赖的模块合并输出到一个 bundle.js 文件
     filename: 'bundle.js',
@@ -23,6 +27,12 @@ module.exports = {
       }
     ]
   },
+  resolve: {
+    modules: [path.resolve(__dirname, '../node_modules'), 'node_modules']
+  },
+  // externals: {
+  //   jquery: 'jQuery'
+  // }
   // plugins: [
   //   new ExtractTextPlugin({
   //     // 从 .js 文件中提取出来的 .css 文件的名称
