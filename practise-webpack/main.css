@@ -6,3 +6,6 @@ div {
     background: green;
     border-bottom: 110px solid black;
 }
+h1 {
+    display: flex;
+}
