@@ -1,0 +1,15 @@
+{
+  "name": "webpack-electron",
+  "version": "1.0.0",
+  "description": "webpack about electron",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ./"
+  },
+  "author": "atie",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^2.0.9"
+  }
+}
