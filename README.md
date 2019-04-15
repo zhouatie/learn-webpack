@@ -12,7 +12,7 @@ local安装的webpack： npx webpack index.js 打包
 
 script中脚本打包 ： npm run build
 
-
+命令行中打包：`npx webpack index.js -o bundle.js` 入口是`index.js`, 出口是`bundle.js`
 
 webpack4设置mode：production 会压缩代码 development 就不压缩代码
 
@@ -56,6 +56,8 @@ loader执行顺序是从下到上，右到左。
 
 ##### webpack-dev-server
 
+> `webpack-dev-server`会对你的代码进行打包，将打包的内容放到内存里面，并不会自动给你打包放进dist里。
+
 `webpack —watch`页面会刷新下，内容会自动更新
 
 `webpack-dev-server`会自动更新当前页面
@@ -97,3 +99,36 @@ app.listen(3000, () => {
 
 > 现在这样子写太麻烦了（vue-cli2也是如此）。因为以前版本`webpack-dev-server`还不够强大，现在不一样了。非常的强大了。
 
+
+
+### Hot Module Replacement
+
+> 热替换，就是不会刷新整个页面。当不使用热更新的时候，操作一些功能，新增了三个元素，修改样式页面自动刷新后，刚才新增的元素会消失。如果开启了热替换，那么原先的dom会还在。
+
+```javascript
+const webpack = require('webpack')
+	// ....
+  devServer: {
+    contentBase: './dist',
+      open: true,
+      hot: true,
+      hotOnly: true // 以防hot失效后，页面被刷新
+  },
+  // ...
+  plugins: [
+     new webpack.HotModuleReplacementPlugin()
+  ]
+```
+
+```javascript
+import number from './number.js'
+
+if (module.hot) { // 如果热更新存在
+ 	// 监听的文件改变，会触发后面的回调方法
+  module.hot.accept('./number', () => {
+    // dosomething
+  })
+}
+```
+
+> 为什么修改了css文件不需要写module.hot。而写js需要写呢，因为css-loader已经自动帮你处理了。

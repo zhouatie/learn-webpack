@@ -1,6 +1,7 @@
 const path = require('path')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const webpack = require('webpack')
 
 module.exports = {
     mode: "development",
@@ -11,7 +12,9 @@ module.exports = {
     },
     devServer: {
         contentBase: './dist',
-        open: true
+        open: true,
+        hot: true,
+        hotOnly: true
     },
     module: {
         rules: [
@@ -23,28 +26,13 @@ module.exports = {
                 test: /\.less$/,
                 use: ['style-loader', 'css-loader', 'less-loader']
             }
-            // {
-            //     test: /\.less$/,
-            //     use: ['style-loader', {
-            //         loader: 'css-loader',
-            //         options: {
-            //             importLoaders: 2
-            //         }
-            //     }, 'less-loader']
-            // }
-            // {
-            //     loader: 'style-loader' // creates style nodes from JS strings
-            // }, {
-            //     loader: 'css-loader' // translates CSS into CommonJS
-            // }, {
-            //     loader: 'less-loader' // compiles Less to CSS
-            // }
         ]
     },
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             template: './index.template.html'
-        })
+        }),
+        new webpack.HotModuleReplacementPlugin()
     ]
 }
