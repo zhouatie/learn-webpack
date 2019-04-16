@@ -42,11 +42,11 @@ devtool: source-map
 
 ### loader
 
-import style from './index.css'
+`import style from './index.css'`
 
-style-loader 的options 添加modules ：true
+`style-loader` 的`options` 添加`modules ：true`
 
-dom.classList.add(style.avatar) 可以让这个dom独立拥有这个样式
+`dom.classList.add(style.avatar)` 可以让这个dom独立拥有这个样式
 
 loader执行顺序是从下到上，右到左。
 
