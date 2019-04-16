@@ -28,11 +28,11 @@ devtool: source-map
 
 `inline-source-map`: 不会新生成.map文件，会插入到打包的文件底部
 
-`cheap-inline-source-map`:  因为liline-source-map报错会告诉你第几行第几个字符。前面加上cheap的话 只会告诉你第几行
+`cheap-inline-source-map`:  因为`inline-source-map`报错会告诉你第几行第几个字符。前面加上cheap的话 只会告诉你第几行
 
-`cheap-module-inline-source-map`: 本来map只会映射打包出来的index.js跟业务代码中的关系。第三方引入库报错映射不到。中间加了module这个参数就可以了。
+`cheap-module-inline-source-map`: 本来map只会映射打包出来的index.js跟业务代码中的关系。第三方引入库报错映射不到。中间加了module这个参数就可以了。比如`loader`也会有`source-map`
 
-开发的时候建议使用：`cheap-module-eval-source-map`
+开发的时候建议使用：`cheap-module-eval-source-map`,`eval`表示不会独立生成map文件，而是打包进代码里。
 
 一般`development`环境用 `cheap-module-eval-source-map`
 
@@ -112,7 +112,7 @@ const webpack = require('webpack')
     contentBase: './dist',
       open: true,
       hot: true,
-      hotOnly: true // 以防hot失效后，页面被刷新
+      hotOnly: true // 以防hot失效后，页面被刷新，使用这个，hot失效也不刷新页面
   },
   // ...
   plugins: [
@@ -284,4 +284,22 @@ module: {
 ```
 
 #### react中应用babel
+
+安装：`npm install --save-dev @babel/preset-react`
+
+往刚刚的`.babelrc`文件中添加配置
+
+```javascript
+// presets对应一个数组，如果这个值需要做配置，那么这个值在包装进一个数组，放到第一项，第二项是个对象，用于描述该babel
+{
+    "presets": [
+        ["@babel/preset-env", {
+            "useBuiltIns": "usage"
+        }],
+        "@babel/preset-react"
+    ]
+}
+```
+
+**注意：转换是先下后上，就是使用preset-react转换react代码，再用preset-env将js代码转换为es5代码**
 
