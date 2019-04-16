@@ -132,3 +132,156 @@ if (module.hot) { // 如果热更新存在
 ```
 
 > 为什么修改了css文件不需要写module.hot。而写js需要写呢，因为css-loader已经自动帮你处理了。
+
+
+
+### babel
+
+#### 基本用法
+
+将高版本的js代码转换成低版本的js代码。比如ie浏览器不兼容es6，需要使用babel把es6代码把js转换成低版本的js代码。
+
+安装：`npm install --save-dev babel-loader @babel/core`
+
+```javascript
+module: {
+  rules: [
+    { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
+  ]
+}
+```
+
+`babel-loader`并不会帮助你把es6语法转换成低级的语法。它只是帮助打通webpack跟babel之间的联系。
+
+
+
+转换成es5的语法：
+
+安装：`npm install @babel/preset-env --save-dev`
+
+`@babel/preset-env`包含了es6转换成es5的所有规则。
+
+```javascript
+module: {
+  rules: [
+    { 
+      test: /\.js$/,
+      exclude: /node_modules/,
+      loader: "babel-loader",
+      options: {
+        "presets": ["@babel/preset-env"]
+      }
+    }
+  ]
+}
+```
+
+
+
+如果还需要降到更低版本就得使用`babel-polyfill`
+
+安装：`npm install --save @babel/polyfill`
+
+页面顶部引入`import "@babel/polyfill";`就可以将高级版本语法转换成低级语法。但是直接`import`会让打包后的文件非常大。
+
+这个时候就需要再配置`webpack.config.js`
+
+**useBuiltIns**
+
+```javascript
+{ 
+    test: /\.js$/,
+    exclude: /node_modules/,
+    loader: "babel-loader",
+    options: {
+    		// "presets": ["@babel/preset-env"]
+        // 当你做babel-polyfill往浏览器填充的时候，根据业务代码用到什么加什么，并不会全部写入,
+      	// 数组中，后面的对象是对数组前面的babel做配置
+        "presets": [["@babel/preset-env", {
+            useBuiltIns: 'usage'
+        }]]
+    }
+}
+```
+
+
+
+**如果开发一个第三方库，类库。使用`babel-polyfill`会注入到全局，污染到全局环境**。
+
+安装：`npm install --save-dev @babel/plugin-transform-runtime`
+
+安装：`npm install --save @babel/runtime`
+
+```javascript
+{ 
+    test: /\.js$/,
+    exclude: /node_modules/,
+    loader: "babel-loader",
+    options: {
+      "plugins": ["@babel/plugin-transform-runtime"]
+    }
+}
+```
+
+当你要添加配置时
+
+```javascript
+{ 
+    test: /\.js$/,
+    exclude: /node_modules/,
+    loader: "babel-loader",
+    options: {
+      "plugins": [["@babel/plugin-transform-runtime", {
+        "absoluteRuntime": false,
+        "corejs": false,
+        "helpers": true,
+        "regenerator": true,
+        "useESModules": false
+      }]]
+    }
+}
+```
+
+如果你要将corejs赋值为2
+
+安装：`npm install --save @babel/runtime-corejs2`
+
+```javascript
+{ 
+    test: /\.js$/,
+    exclude: /node_modules/,
+    loader: "babel-loader",
+    options: {
+      "plugins": [["@babel/plugin-transform-runtime", {
+        "absoluteRuntime": false,
+        "corejs": 2,
+        "helpers": true,
+        "regenerator": true,
+        "useESModules": false
+      }]]
+    }
+}
+```
+
+`@babel/plugin-transform-runtime`不会污染到全局环境。
+
+当babel配置非常多的时候，可以将他们放到`.babelrc`文件里
+
+在根目录下创建`.babelrc`文件
+
+将`options`里的代码放到这个文件中，如下：
+
+```javascript
+{
+  "plugins": [["@babel/plugin-transform-runtime", {
+    "absoluteRuntime": false,
+    "corejs": 2,
+    "helpers": true,
+    "regenerator": true,
+    "useESModules": false
+  }]]
+}
+```
+
+#### react中应用babel
+
