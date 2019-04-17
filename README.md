@@ -303,3 +303,42 @@ module: {
 
 **注意：转换是先下后上，就是使用preset-react转换react代码，再用preset-env将js代码转换为es5代码**
 
+
+
+### 性能优化
+
+#### tree shaking
+
+一个模块里会导出很多东西。把一个模块里没有被用到的东西都给去掉。不会把他打包到入口文件里。tree shaking只支持es6的方式引入(`import`)，使用`require`无法使用`tree shaking`。
+
+
+
+`webpack`的`development`无法使用`tree shaking`功能。除非在打包的配置里加上
+
+```javascript
+// 开发环境需要加如下代码
+optimization: {
+  usedExports: true
+}
+```
+
+当你需要import某个模块，又不想`tree shaking`把他给干掉，就需要在package.json里修改`sideEffects`参数。比如当你`import  './console.js' `, `import './index.css'`等没有`export`(导出)模块的文件。又不想`tree shaking`把它干掉。
+
+```javascript
+// package.json
+sideEffects: ['./console.js', './index.css']
+// 反之
+sideEffects: false
+```
+
+**在`development`环境即使你使用`tree shaking`，它也不会把其他多余的代码给干掉。他只会在打包的文件里注明某段代码是不被使用的。**
+
+
+
+### `development` 和 `production` 区别
+
+`development`代码不压缩，`production`代码会压缩
+
+ 
+
+`webpack-merge`
