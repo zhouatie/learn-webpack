@@ -305,7 +305,7 @@ module: {
 
 
 
-### 性能优化
+### 中级
 
 #### tree shaking
 
@@ -333,12 +333,66 @@ sideEffects: false
 
 **在`development`环境即使你使用`tree shaking`，它也不会把其他多余的代码给干掉。他只会在打包的文件里注明某段代码是不被使用的。**
 
-
-
-### `development` 和 `production` 区别
+#### `development` 和 `production` 区别
 
 `development`代码不压缩，`production`代码会压缩
 
- 
+省略…☺
 
 `webpack-merge`
+
+`react`和`vue`都会区分环境进行不同的`webpack`配置,但是它们一定会有相同的部分。这个时候需要通过使用`webpack-merge`进行抽离。
+
+```javascript
+// webpack.base.config.js
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+    mode: 'production',
+    // mode: 'development',
+    entry: './index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, './dist')
+    },
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
+            }
+        ]
+    },
+    optimization: {
+        usedExports: true
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './index.html'
+        })
+    ]
+}
+
+// webpack.dev.config.js
+const merge = require('webpack-merge')
+const baseConfig = require('./webpack.base.config')
+const devConfig = {
+    mode: 'development',
+}
+
+module.exports = merge(baseConfig, devConfig)
+```
+
+这里就不重复把`production`环境在配置出来了，主要介绍下`webpack-merge`用法。
+
+- 安装`npm i webpack-merge -D`
+- 新建一个公共的文件如：`webpack.base.config.js`
+- 将`development`和`production`两个`webpack`配置相同的抽离到`webpack.base.config.js`文件中
+- 在环境配置文件中(具体代码如上)
+  - `const merge = require('webpack-merge')`
+  - `const baseConfig = require('./webpack.base.config.js')`
+  - `module.exports = merge(baseConfig, devConfig)`
+
+
+
