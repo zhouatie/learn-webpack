@@ -387,12 +387,20 @@ module.exports = merge(baseConfig, devConfig)
 这里就不重复把`production`环境在配置出来了，主要介绍下`webpack-merge`用法。
 
 - 安装`npm i webpack-merge -D`
+
 - 新建一个公共的文件如：`webpack.base.config.js`
+
 - 将`development`和`production`两个`webpack`配置相同的抽离到`webpack.base.config.js`文件中
+
 - 在环境配置文件中(具体代码如上)
+
   - `const merge = require('webpack-merge')`
+
   - `const baseConfig = require('./webpack.base.config.js')`
+
   - `module.exports = merge(baseConfig, devConfig)`
 
+    
 
+#### `webpack` 和 `code splitting`
 
