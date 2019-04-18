@@ -404,3 +404,70 @@ module.exports = merge(baseConfig, devConfig)
 
 #### `webpack` 和 `code splitting`
 
+当你把所有的代码都打包到一个文件的时候，每次改一个代码都需要重新打包。且用户都要重新加载下这个js文件。但是如果你把一些公共的代码或第三方库抽离并单独打包。通过缓存加载，会加快页面的加载速度。
+
+1. 异步加载的代码，webpack会单独打包到一个js文件中
+2. 同步加载的代码有两种方式
+
+
+
+原始代码
+
+```javascript
+import _ from 'lodash'
+
+console.log(666)
+```
+
+
+
+打包后的文件：
+
+`main.js  551 KiB    main  [emitted]  main`
+可以看到，webpack将业务代码跟lodash库打包到一个main.js文件了
+
+
+
+方法一：
+
+创建一个新文件
+
+```javascript
+import _ from 'lodash'
+window._ = _
+```
+
+将文件挂载到`window`对象上,这样其他地方就可以直接使用了。
+
+然后在webpack配置文件中的entry增加一个入口为该文件。让该文件单独打包。
+
+```javascript
+    Asset      Size  Chunks             Chunk Names
+lodash.js   551 KiB  lodash  [emitted]  lodash
+  main.js  3.79 KiB    main  [emitted]  main
+```
+
+
+
+方法二：
+
+通过添加`optimization`配置参数
+
+```javascript
+optimization: {
+  splitChunks: {
+    chunks: 'all'
+  }
+},
+```
+
+打包后文件：
+
+```javascript
+          Asset      Size        Chunks             Chunk Names
+        main.js  6.78 KiB          main  [emitted]  main
+vendors~main.js   547 KiB  vendors~main  [emitted]  vendors~main
+```
+
+可以看到，webpack将lodash抽成公共的chunk打包出来了。
+
