@@ -402,7 +402,7 @@ module.exports = merge(baseConfig, devConfig)
 
     
 
-#### `webpack` 和 `code splitting`
+####  `code splitting`和`splitChunks`
 
 当你把所有的代码都打包到一个文件的时候，每次改一个代码都需要重新打包。且用户都要重新加载下这个js文件。但是如果你把一些公共的代码或第三方库抽离并单独打包。通过缓存加载，会加快页面的加载速度。
 
@@ -528,7 +528,7 @@ optimization: {
             // 打包除上面vendors以外的公共模块
             default: {
                 priority: -20,
-                reuseExistingChunks: true,
+                reuseExistingChunks: true, // 如果该chunk已经被打包进其他模块了，这里就复用了，不打包进common.js了
                 filename: 'common.js'
             }
         }
@@ -557,6 +557,11 @@ splitChunks: {
   minSize: 3000, // 表示文件大于3000k的时候才对他进行打包
   maxSize: 0,
   minChunks: 1, // 当某个模块满足minChunks引用次数时，才会被打包
+  maxAsyncRequests: 5, // 在打包某个模块的时候，最多分成5个chunk，多余的会合到最后一个chunk中。这里分析下这个属性过大过小带来的问题。当设置的过大时，模块被拆的太细，造成并发请求太多。影响性能。当设置过小时，比如1，公共模块无法被抽离成公共的chunk。每个打包出来的模块都会有公共chunk
+  automaticNameDelimiter: '~', // 当vendors或者default中的filename不填时，打包出来的文件名就会带~
+  name: true,
+  cashGroups: {} // 如上
 }
 ```
 
+ [maxAsyncRequests](<https://www.jianshu.com/p/91e1082bce20>)

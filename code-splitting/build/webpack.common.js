@@ -14,6 +14,7 @@ module.exports = {
             chunks: 'all',
             minSize: 1000,
             minChunks: 2,
+            maxAsyncRequests: 1,
             cacheGroups: {
                 // 下面的意思是：将从node_modules中引入的模块统一打包到一个vendors.js文件中
                 vendors: {
