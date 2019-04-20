@@ -453,6 +453,8 @@ lodash.js   551 KiB  lodash  [emitted]  lodash
 
 通过添加`optimization`配置参数
 
+`optimization`: 会将诸如`lodash`等库抽离成单独的`chunk`,还会将多个模块公用的模块抽离成单独的`chunk`
+
 ```javascript
 optimization: {
   splitChunks: {
@@ -470,4 +472,8 @@ vendors~main.js   547 KiB  vendors~main  [emitted]  vendors~main
 ```
 
 可以看到，webpack将lodash抽成公共的chunk打包出来了。
+
+
+
+
 
