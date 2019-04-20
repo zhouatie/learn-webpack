@@ -473,7 +473,90 @@ vendors~main.js   547 KiB  vendors~main  [emitted]  vendors~main
 
 可以看到，webpack将lodash抽成公共的chunk打包出来了。
 
+`splitChunks`里面还可以在添加个参数`cacheGroups`
 
 
 
+```javascript
+optimization: {
+    splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          	// 下面的意思是：将从node_modules中引入的模块统一打包到一个vendors.js文件中
+            vendors: {
+                test: /[\\/]node_modules[\\/]/,
+                priority: -10,
+                filename: 'vendors.js'
+            },
+            default: false
+        }
+    }
+}
+```
+
+`cacheGroups`中`vendors`配置表示将从`node_modules`中引入的模块统一打包到一个vendors.js文件中
+
+
+
+`splitChunks`的`vendors`的`default`参数：
+
+根据上下文来解释，如上配置了`vendors`，打包`node_modules`文件夹中的模块，
+
+那么`default`将会打包自己编写的公共方法。
+
+当不使用`default`配置时。
+
+```javascript
+     Asset     Size             Chunks             Chunk Names
+   main.js  315 KiB               main  [emitted]  main
+   test.js  315 KiB               test  [emitted]  test
+```
+
+添加如下配置之后：
+
+```javascript
+optimization: {
+    splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          	// 下面的意思是：将从node_modules中引入的模块统一打包到一个vendors.js文件中
+            vendors: {
+                test: /[\\/]node_modules[\\/]/,
+                priority: -10,
+                filename: 'vendors.js'
+            },
+            // 打包除上面vendors以外的公共模块
+            default: {
+                priority: -20,
+                reuseExistingChunks: true,
+                filename: 'common.js'
+            }
+        }
+    }
+}
+```
+
+打包后的文件体积为
+
+```javascript
+     Asset      Size             Chunks             Chunk Names
+ common.js   308 KiB  default~main~test  [emitted]  default~main~test
+   main.js  7.03 KiB               main  [emitted]  main
+   test.js  7.02 KiB               test  [emitted]  test
+```
+
+
+
+
+
+**配置说明**
+
+```js
+splitChunks: {
+  chunk: 'all', // all(全部)， async(异步的模块)，initial(同步的模块)
+  minSize: 3000, // 表示文件大于3000k的时候才对他进行打包
+  maxSize: 0,
+  minChunks: 1, // 当某个模块满足minChunks引用次数时，才会被打包
+}
+```
 
