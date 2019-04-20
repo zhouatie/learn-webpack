@@ -147,7 +147,7 @@
 /******/
 /******/
 /******/ 	// add entry module to deferred list
-/******/ 	deferredModules.push(["./src/test1.js","vendors~main","lodash~main"]);
+/******/ 	deferredModules.push(["./src/test1.js","vendors~main~test","default~main~test"]);
 /******/ 	// run deferred modules when ready
 /******/ 	return checkDeferredModules();
 /******/ })
