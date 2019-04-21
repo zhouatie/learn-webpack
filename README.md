@@ -556,7 +556,7 @@ splitChunks: {
   chunk: 'all', // all(全部)， async(异步的模块)，initial(同步的模块)
   minSize: 3000, // 表示文件大于3000k的时候才对他进行打包
   maxSize: 0,
-  minChunks: 1, // 当某个模块满足minChunks引用次数时，才会被打包
+  minChunks: 1, // 当某个模块满足minChunks引用次数时，才会被打包。例如,lodash只被一个文件import，那么lodash就不会被code splitting,lodash将会被打包进 被引入的那个文件中。如果满足minChunks引用次数，lodash会被单独抽离出来，打出一个chunk。
   maxAsyncRequests: 5, // 在打包某个模块的时候，最多分成5个chunk，多余的会合到最后一个chunk中。这里分析下这个属性过大过小带来的问题。当设置的过大时，模块被拆的太细，造成并发请求太多。影响性能。当设置过小时，比如1，公共模块无法被抽离成公共的chunk。每个打包出来的模块都会有公共chunk
   automaticNameDelimiter: '~', // 当vendors或者default中的filename不填时，打包出来的文件名就会带~
   name: true,
@@ -565,3 +565,33 @@ splitChunks: {
 ```
 
  [maxAsyncRequests](<https://www.jianshu.com/p/91e1082bce20>)
+
+#### Lazy Loading
+
+异步`import`的包会被单独打成一个`chunk`
+
+```javascript
+async function getComponent() {
+    const { default: _ } = await import(/* webpackChunkNanem:'lodash */ 'lodash')
+    const element = document.createElement('div')
+    element.innerHTML = _.join(['Dell', 'Lee'], '-')
+    return element
+}
+document.addEventListener('click', () => {
+    getComponent().then(element => {
+        document.body.appendChild(element)
+    })
+})
+```
+
+
+
+[lazy loading](<https://webpack.js.org/guides/lazy-loading>)
+
+
+
+#### chunk
+
+每一个`js`文件都是一个`chunk`
+
+`chunk`是使用`Webpack`过程中最重要的几个概念之一。在Webpack打包机制中，编译的文件包括entry（入口，可以是一个或者多个资源合并而成，由html通过script标签引入）和chunk（被entry所依赖的额外的代码块，同样可以包含一个或者多个文件）。从页面加速的角度来讲，我们应该尽可能将所有的js打包到一个bundle.js之中，但是总会有一些功能是使用过程中才会用到的。出于性能优化的需要，对于这部分资源我们可以做成按需加载。
