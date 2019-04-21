@@ -637,5 +637,140 @@ plugins: [
 
 #### CSS文件的代码分割
 
+我们之前写的css文件都会被打包进js文件中，要想把css单独打包成一个css文件该怎么做呢？
+
+这个时候就需要用到`MiniCssExtractPlugin`
+
+开发环境用不到这个功能，一般都是用在生产环境中。
+
+安装：`npm install --save-dev mini-css-extract-plugin`
+
+
+
+```javascript
+// webpack.config.js
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+module: {
+  rules: [
+    {
+      test: /\.css$/,
+      use: [{
+        loader: MiniCssExtractPlugin.loader,
+        options: {
+          // 可以在此处指定publicPath
+          // 默认情况下，它在webpackoptions.output中使用publicPath
+          publicPath: '../',
+          // hmr: process.env.NODE_ENV === 'development',
+        },
+      }, 'css-loader']
+    }
+  ]
+},
+plugins: [
+  new MiniCssExtractPlugin({
+    // 与webpackoptions.output中相同选项类似的选项
+    // 两个选项都是可选的
+    filename: '[name].css',
+    chunkFilename: '[id].css',
+  }),
+]
+
+// index.js
+import './index.css';
+console.log('haha')
+
+// index.css
+body {
+    background: green;
+}
+```
+
+这样打包之后，css会被单独打包成一个css文件。
+
+
+
+#### 缓存
+
+目前为止，我们每次修改内容，打包出去后的文件名都不变。线上环境的文件是有缓存的。所以当你文件名不变的话，更新内容打包上线。有缓存的电脑就无法获取到最新的代码。
+
+这个时候我们就会用到`contenthash`
+
+我们先记录配置`contenthash`之前打包的文件名。
+
+```javascript
+     Asset       Size  Chunks             Chunk Names
+index.html  180 bytes          [emitted]  
+   main.js   3.81 KiB    main  [emitted]  main
+```
+
+接下来我们来配置下`contenthash` (就是根据你文件内容生成的hash值)
+
+```javascript
+// webpack.config.js
+output: {
+  path: path.resolve(__dirname, '../dist'),
+  filename: '[name][contenthash].js'
+},
+```
+
+打包完之后会在`main`后面接上`hash`值。
+
+```javascript
+                      Asset       Size  Chunks             Chunk Names
+                 index.html  200 bytes          [emitted]  
+mainf5faa2d3d1e119256290.js   3.81 KiB    main  [emitted]  main
+```
+
+当你不更新内容重新打包后，`contenthash`还会维持不变。所以线上用户访问的时候就不会去服务器重新拿取代码，而是从缓存中取文件。
+
+
+
+#### `shimming` (垫片)
+
+以`jquery`为例，代码如下
+
+```javascript
+// index.js
+import $ from 'jquery'
+$('body').html('HHAHAH')
+import func from './test.js'
+func()
+
+
+// test.js
+export default function func() {
+    $('body').append('<h1>2</h1>')
+}
+
+```
+
+当你不在test.js中引入`import $ from 'jquery'`
+
+那么浏览器访问的时候，会报
+
+`test.js:5 Uncaught ReferenceError: $ is not defined`
+
+
+
+这个时候就需要使用垫片功能
+
+```javascript
+const webpack = require('webpack')
+
+plugins: [
+  new webpack.ProvidePlugin({
+    $: 'jquery'
+  })
+]
+```
+
+当你加上这段代码后，模块在打包的时候，发现你使用了`$`就会在你模块顶部自动加入`import $ from 'jquery'`
+
+**其他关于`shimming`的内容参考`webpack`官网  [shimming](<https://webpack.js.org/guides/shimming>)**
+
+
+
+
 
 
