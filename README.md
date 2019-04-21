@@ -595,3 +595,47 @@ document.addEventListener('click', () => {
 每一个`js`文件都是一个`chunk`
 
 `chunk`是使用`Webpack`过程中最重要的几个概念之一。在Webpack打包机制中，编译的文件包括entry（入口，可以是一个或者多个资源合并而成，由html通过script标签引入）和chunk（被entry所依赖的额外的代码块，同样可以包含一个或者多个文件）。从页面加速的角度来讲，我们应该尽可能将所有的js打包到一个bundle.js之中，但是总会有一些功能是使用过程中才会用到的。出于性能优化的需要，对于这部分资源我们可以做成按需加载。
+
+
+
+#### 打包分析
+
+打包分析：
+
+安装：`npm install --save-dev webpack-bundle-analyzer`
+
+```javascript
+// package.json => scripts
+
+"analyz": "NODE_ENV=production npm_config_report=true npm run build"
+```
+
+
+
+```javascript
+// webpack.config.js
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+plugins: [
+  new BundleAnalyzerPlugin()
+]
+```
+
+
+
+执行命令`npm run analyz`
+
+浏览器就会自动打开`localhost:8888`，分析图就会展现在你眼前
+
+非常清晰直观的看出
+
+![image-20190421142354243](/Users/zhouatie/Library/Application Support/typora-user-images/image-20190421142354243.png)
+
+
+
+
+
+#### CSS文件的代码分割
+
+
+
