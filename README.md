@@ -771,6 +771,94 @@ plugins: [
 
 
 
+### 高级
+
+
+
+#### library
+
+当你要开发第三方库供别人使用时，就需要用到`library`和`libraryTarget`这两个配置了。
+
+**`library`**
+
+```javascript
+output: {
+    filename: 'library.js',
+    library: 'library',
+    libraryTarget: 'umd'
+},
+```
+
+`library`: 当配置了这个`library`参数后，会把`library`这个`key`对应的`value`即上面代码`library`挂载到全局作用域中。`html`用`script`标签引入，可以通过访问全局变量`library`访问到我们自己开发的库。
+
+`libraryTarget`:这个默认值为`var`。意思就是让library定义的变量挂载到全局作用域下。当然还有浏览器环境的`window`,`node`环境的`global`,`umd`等。当设置了`window`、`global`,`library`就会挂载到这两个对象上。当配置了`umd`后，你就可以通过`import`,`require`等方式引入了。
+
+
+
+**`externals`**
+
+`exterals`是开发公共库很重要的一个配置。当你的公共库引入了第三方库的时候，公共库会把该第三方库也打包进你的模块里。当使用者也引入了这个第三方库后，这个时候打包就会又打了一份第三方库进来。
+
+所在在公共模块库中配置如下代码
+
+```javascript
+externals: {
+    // 前面的lodash是我的库里引入的包名 比如 import _ from 'lodash'
+    // 后面的lodash是别人业务代码需要注入到他自己模块的lodash 比如 import lodash from 'lodash',注意不能import _ from 'lodash',因为配置项写了lodash 就不能import _
+    lodash: 'lodash'
+},
+```
+
+**前面的`lodash`是我的库里引入的包名 比如` import _ from 'lodash'`,后面的`lodash`是别人业务代码需要注入到他自己模块的`lodash` 比如 `import lodash from 'lodash'`,注意不能`import _ from 'lodash'`,因为配置项写了`lodash` 就不能`import _`。**
+
+本人做了个试验，当自己开发的包不引入`lodash`,业务代码中也不引入`lodash`,那么打包业务代码的时候，`webpack`会把`lodash`打进你业务代码包里。
+
+当然`externals`,配置还有多种写法，如下
+
+```javascript
+externals: {
+    lodash: {
+        commonjs: 'lodash',
+        commonjs2: 'lodash',
+        amd: 'lodash',
+        root: '_'
+    }
+}
+
+externals: ['lodash', 'jquery']
+
+externals: 'lodash'
+```
+
+具体请参考官网[externals](<https://webpack.js.org/configuration/externals#externals>)
+
+
+
+#### 发布自己开发的npm包
+
+学了上面的配置后，就需要学习下如何将自己的包发布到`npm`仓库上了。
+
+- `package.json` 的入口要改成`dist`目录下的js文件如： `"main": "./dist/library.js"`
+
+- 注册npm账号。npm会发送一份邮件到你的邮箱上，点击下里面的链接进行激活。
+- 命令行输入`npm login` 进行登录，或者`npm adduser` 添加账号
+- `npm publish`
+
+当出现如下提示代表发布成功
+
+```javascript
+// 当出现类似如下代码时，表示你已经发布成功
+➜  library git:(master) ✗ npm publish
++ atie-first-module-library@1.0.0
+```
+
+
+
+遇到的问题：
+
+当你遇到`npm ERR! you must verify your email before publishing a new package`说明你还没有激活你的邮箱，去邮箱里点击下链接激活下就ok了
+
+当你已经登录了提醒`npm ERR! 404 unauthorized Login first`,这个时候你就要注意下你的`npm`源了，看看是否设置了淘宝源等。记得设置回来`npm config set registry https://registry.npmjs.org/`
 
 
 
