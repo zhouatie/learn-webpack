@@ -862,3 +862,184 @@ externals: 'lodash'
 
 
 
+#### PWA
+
+
+
+http-server
+
+workbox-webpack-plugin
+
+相信很多朋友都有耳闻过`PWA`这门技术,`PWA`是`Progressive Web App`的英文缩写， 翻译过来就是渐进式增强WEB应用， 是Google 在2016年提出的概念，2017年落地的web技术。目的就是在移动端利用提供的标准化框架，在网页应用中实现和原生应用相近的用户体验的渐进式网页应用。
+
+优点：
+
+1. **可靠** 即使在不稳定的网络环境下，也能瞬间加载并展现
+2. **快** 快速响应，并且 动画平滑流畅
+
+
+
+应用场景：
+
+当你访问正常运行的服务器页面的时候，页面正常加载。可当你服务器挂了的时候，页面就无法正常加载了。
+
+这个时候就需要使用到pwa技术了。
+
+这里我编写最简单的代码重现下场景：
+
+```javascript
+// webpack.config.js
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+
+module.exports = {
+    mode: 'production',
+    entry: './index.js',
+    output: {
+        filename: 'bundle.js'
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin()
+    ]
+}
+
+// index.js
+console.log('this is outer console')
+
+// package.json
+{
+  "name": "PWA",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start": "http-server ./dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "clean-webpack-plugin": "^2.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "http-server": "^0.11.1",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1",
+  }
+}
+
+```
+
+执行下`npm run build`
+
+```javascript
+.
+├── bundle.js
+└── index.html
+```
+
+为了模拟服务器环境，我们安装下`http-server`
+
+`npm i http-server -D`
+
+配置下`package.json`，`"start": "http-server ./dist"`
+
+执行`npm run start`来启动dist文件夹下的页面
+
+
+
+这个时候控制台会正常打印出`'this is outer console'`
+
+当我们断开`http-server`服务后，在访问该页面时，页面就报404了
+
+
+
+这个时候就需要使用到pwa技术了
+
+
+
+使用步骤：
+
+安装： `npm i workbox-webpack-plugin -D`
+
+webpack配置文件配置：
+
+```javascript
+// webpack.config.js
+const {GenerateSW} = require('workbox-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+
+module.exports = {
+    mode: 'production',
+    entry: './index.js',
+    output: {
+        filename: 'bundle.js'
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin(),
+        new GenerateSW({
+            skipWaiting: true, // 强制等待中的 Service Worker 被激活
+            clientsClaim: true // Service Worker 被激活后使其立即获得页面控制权
+        })
+    ]
+}
+```
+
+
+
+这里我们写一个最简单的业务代码，在注册完pwa之后打印下内容：
+
+```javascript
+// index.js
+console.log('this is outer console')
+
+ // 进行 service-wroker 注册
+ if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker
+            .register('./service-worker.js')
+            .then(registration => {
+                console.log('====== this is inner console ======')
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
+```
+
+
+
+执行下打包命令：`npm run build`
+
+```javascript
+.
+├── bundle.js
+├── index.html
+├── precache-manifest.e21ef01e9492a8310f54438fcd8b1aad.js
+└── service-worker.js
+```
+
+打包之后会生成个`service-worker.js`与`precache-manifest.e21ef01e9492a8310f54438fcd8b1aad.js`
+
+接下来再重启下`http-server`服务：`npm run start`
+
+
+
+页面将会打印出
+
+```javascript
+this is outer console
+====== this is inner console ======
+...
+```
+
+然后我们再断开`http-server`服务
+
+
+
+刷新下页面，竟然打印出了相同的代码。说明pwa离线缓存成功。
