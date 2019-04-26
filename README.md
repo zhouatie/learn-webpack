@@ -1308,9 +1308,25 @@ devServer: {
 target: ''， // 代理的目标地址
 secure: false, // 请求https的需要设置
 changeOrigin: true,  // 跨域的时候需要设置
-host: 'http://www.baidu.com', //修改请求域名
+headers: {
+  host: 'http://www.baidu.com', //修改请求域名
+  cookie: ''
+}
 ...
 ```
 
 其他关于`devServer`的配置详见[devServer](<https://webpack.js.org/configuration/dev-server#devserverproxy>)
 
+
+
+#### WebpackDevServer解决单页面路由404问题
+
+相信大家都是开发过vue或者react单页面带路由的应用。这里就忽略业务代码，介绍下`devServer`的`historyApiFallback`参数
+
+```javascript
+devServer: {
+  historyApiFallback: true, // 当设置为true时，切换路由就不会出现路由404的问题了
+}
+```
+
+详见[historyApiFallback](<https://webpack.js.org/configuration/dev-server#devserverhistoryapifallback>)
