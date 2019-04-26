@@ -1,3 +1,5 @@
+import * as _ from 'lodash'
+
 class Greeter {
     greeting: string;
     constructor(message: string) {
@@ -13,7 +15,7 @@ let greeter = new Greeter("world");
 let button = document.createElement('button');
 button.textContent = "Say Hello";
 button.onclick = function() {
-    alert(greeter.greet());
+    alert(_.join(['lodash', greeter.greet()], '-'));
 }
 
 document.body.appendChild(button);

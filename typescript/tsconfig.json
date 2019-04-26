@@ -1,6 +1,9 @@
 {
     "compilerOptions": {
-        "outDir": "./dist",
-        "module": "es6"
+        "outDir": "./dist/", // 默认解析后的文件输出位置
+        "noImplicitAny": true,
+        "module": "es6", // 表示这是一个es6模块机制
+        "target": "es5", // 表示要讲ts代码转成es5代码
+        "allowJs": true // 表示允许引入js文件
     }
 }
