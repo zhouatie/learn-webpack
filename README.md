@@ -1158,3 +1158,159 @@ document.body.appendChild(button);
 
 
 
+#### 使用`WebpackDevServer`实现请求转发
+
+当我们工作本地开发某一个需求的时候，需要将这块需求的请求地址转发到某个后端同事的本地服务器或某个服务器上，就需要用到代理。然后其他页面的请求都走测试环境的请求。那么我们该怎样拦截某个请求，并将其转发到我们想要转发的接口上呢？
+
+
+
+这个时候就需要用到`webpack-dev-server`
+
+主要看`devServer`配置：
+
+```javascript
+// webpack.config.js
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+    mode: "development",
+    entry: './index.js',
+    output: {
+        filename: 'bundle.js'
+    },
+    devServer: {
+        contentBase: './dist',
+        open: true,
+        hot: true
+    },
+    plugins: [
+        new HtmlWebpackPlugin(),
+        new CleanWebpackPlugin()
+    ]
+}
+```
+
+```javascript
+// package.json
+
+scripts: {
+  "server": "webpack-dev-server"
+}
+```
+
+```javascript
+// index.js
+import axios from 'axios'
+
+const div = document.createElement('div')
+div.innerHTML = 'hahahha'
+div.addEventListener('click', () => {
+    alert('hahah')
+    axios.get('/list').then(res => {
+        console.log(res)
+    })
+})
+
+document.body.appendChild(div)
+```
+
+在写一个本地启动的服务端代码
+
+```javascript
+const express = require('express')
+const app = express()
+
+app.get('/api/list', (req, res) => {
+    res.json({
+        success: true
+    })
+})
+
+app.listen(8888, () => {
+    console.log('listening localhost:8888')
+})
+```
+
+
+
+执行`npm run server`命令，浏览器会自动打开页面。点击div后，会发起请求。
+
+浏览器提示`http://localhost:8080/api/list 404 (Not Found)`,表示该接口不存在。
+
+因为我们`webpack`启动静态资源服务器默认端口为8080，所以他求会直接请求到8080的/api/list接口。所以会提示找不到该接口。
+
+
+
+为了解决这个问题，我们就需要将该请求从8080端口代理到8888端口(也就是我们自己本地启动的服务)
+
+
+
+配置`webpack.config.js`
+
+这里我只展示`devServer`代码
+
+```javascript
+// webpack.config.js
+devServer: {
+    contentBase: './dist',
+    open: true,
+    hot: true,
+    proxy: {
+        '/api': {
+            target: 'http://localhost:8888'
+        }
+    }
+},
+```
+
+配置`devServer`的`proxy`字段的参数，将请求`/api`开头的请求都转发到`http://localhost:8888`,
+
+通过这个方法可以解决一开始提到的本地开发的时候，只想把部分接口转发到某台部署新需求的服务器上。比如当你这个项目请求很多，不同接口部署在不同的端口或者不同的服务器上。那么就可以通过配置**第一个路径**，来区分不同的模块。并转发到不同的服务上。如：
+
+```javascript
+// webpack.config.js
+devServer: {
+    contentBase: './dist',
+    open: true,
+    hot: true,
+    proxy: {
+        '/module1': {
+            target: 'http://localhost:8887'
+        },
+        '/module2': {
+            target: 'http://localhost:8888'
+        },
+        '/module3': {
+            target: 'http://localhost:8889'
+        }
+    }
+},
+```
+
+当你要代理到某个https的接口上，就需要设置`secure: false`
+
+```javascript
+// webpack.config.js
+devServer: {
+    proxy: {
+        '/api': {
+            target: 'https://other-server.example.com',
+            secure: false
+        }
+    }
+}
+```
+
+
+
+```javascript
+target: ''， // 代理的目标地址
+secure: false, // 请求https的需要设置
+changeOrigin: true,  // 跨域的时候需要设置
+host: 'http://www.baidu.com', //修改请求域名
+...
+```
+
+其他关于`devServer`的配置详见[devServer](<https://webpack.js.org/configuration/dev-server#devserverproxy>)
+
