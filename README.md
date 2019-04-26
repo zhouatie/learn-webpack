@@ -1043,3 +1043,118 @@ this is outer console
 
 
 刷新下页面，竟然打印出了相同的代码。说明pwa离线缓存成功。
+
+
+
+#### typescript
+
+使用webpack打包ts文件，就需要安装`ts-loader`
+
+安装：`npm i ts-loader typescript -D`
+
+`webpack.config.js`文件中添加解析`typescript`代码的`loader`
+
+```javascript
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+
+module.exports = {
+    mode: 'production',
+    entry: './src/index.ts',
+    output: {
+        filename: 'bundle.js'
+    },
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/
+            }
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin()
+    ]
+}
+```
+
+配置了`webpack.config.js`还不行，还得在根目录文件下新增个`.tsconfig.json`文件
+
+```javascript
+{
+    "compilerOptions": {
+        "outDir": "./dist/", // 默认解析后的文件输出位置
+        "noImplicitAny": true, // 存在隐式 any 时抛错
+        "module": "es6", // 表示这是一个es6模块机制
+        "target": "es5", // 表示要讲ts代码转成es5代码
+        "allowJs": true // 表示允许引入js文件。TS 文件指拓展名为 .ts、.tsx 或 .d.ts 的文件。如果开启了 allowJs 选项，那 .js 和 .jsx 文件也属于 TS 文件
+    }
+}
+```
+
+新建`index.ts`
+
+```javascript
+class Greeter {
+    greeting: string;
+    constructor(message: string) {
+        this.greeting = message;
+    }
+    greet() {
+        return "Hello, " + this.greeting;
+    }
+}
+
+let greeter = new Greeter("world");
+
+let button = document.createElement('button');
+button.textContent = "Say Hello";
+button.onclick = function() {
+    alert(greeter.greet());
+}
+
+document.body.appendChild(button);
+```
+
+执行打包命令，访问打包后的页面，页面正常执行。
+
+
+
+当需要使用`lodash`等库时，
+
+需安装：`npm i @types/lodash -D`
+
+修改页面代码 引入 `lodash`
+
+```javascript
+import * as _ from 'lodash'
+
+class Greeter {
+    greeting: string;
+    constructor(message: string) {
+        this.greeting = message;
+    }
+    greet() {
+        return "Hello, " + this.greeting;
+    }
+}
+
+let greeter = new Greeter("world");
+
+let button = document.createElement('button');
+button.textContent = "Say Hello";
+button.onclick = function() {
+    alert(_.join(['lodash', greeter.greet()], '-'));
+}
+
+document.body.appendChild(button);
+```
+
+
+
+**提醒：ts使用的包，可通过`https://microsoft.github.io/TypeSearch` 这个网址去查对应的包使用指南**
+
+
+
