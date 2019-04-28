@@ -726,7 +726,7 @@ mainf5faa2d3d1e119256290.js   3.81 KiB    main  [emitted]  main
 
 
 
-#### `shimming` (垫片)
+#### `shimming` (预置依赖)
 
 以`jquery`为例，代码如下
 
@@ -1330,3 +1330,47 @@ devServer: {
 ```
 
 详见[historyApiFallback](<https://webpack.js.org/configuration/dev-server#devserverhistoryapifallback>)
+
+
+
+
+
+#### eslint
+
+目录下新建`.eslintrc.json`文件。
+
+`environment`: 指定脚本的运行环境
+
+`globals`: 脚本在执行期间访问的额外全局变量。
+
+`rules`: 启动的规则及其各自的错误级别。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+gongchengmulu  eslilnt
+
+eslioader
+
+webpack-dev-server overlay
+
+eslint-loader
