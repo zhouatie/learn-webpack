@@ -1337,7 +1337,11 @@ devServer: {
 
 #### eslint
 
+安装`eslint`: `npm i eslint -D`
+
 目录下新建`.eslintrc.json`文件。
+
+
 
 `environment`: 指定脚本的运行环境
 
@@ -1345,13 +1349,67 @@ devServer: {
 
 `rules`: 启动的规则及其各自的错误级别。
 
+`解析器选项`: 解析器选项
 
 
 
+编辑你的`eslint`的规则
+
+```javascript
+{
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "rules": {
+        "semi": 2
+    }
+}
+```
 
 
 
+`vscode`安装`eslint`插件。
 
+
+
+配置下`webpack.config.js`配置。
+
+```javascript
+...
+devServer: {
+    overlay: true,
+    contentBase: './dist',
+    hot: true,
+    open: true
+},
+module: {
+    rules: [{
+        test: /\.js$/,
+      	exclude: /node_modules/,
+        use: ['eslint-loader']
+    }]
+}
+...
+```
+
+`eslint-loader`是用于检查`js`代码是否符合`eslint`规则。
+
+这里`devServer`中的`overlay`的作用是，当你eslint报错的时候，页面会有个报错蒙层。这样就不局限于编辑器（vscode)的报错提醒了。
+
+如果js代码使用了多个loader，那么eslint-loader一定要写在最右边。如果不写在最后一个的话，需在里面添加`enforce: "pre"`,这样不管写在哪个位置都会优先使用`eslint-loader`校验下代码规范。
+
+```javascript
+{
+    loader: 'eslint-loader',
+    options: {
+        enforce: "pre",
+    }
+}
+```
 
 
 
