@@ -1413,6 +1413,36 @@ module: {
 
 
 
+#### 提升`webpack`打包速度的方法
+
+
+
+1. 跟上技术的迭代
+
+ - 升级`webpack`版本 `node`版本` npm`等版本
+
+2. 尽可能少的模块上应用`loader`
+
+ - `include` `exclude`
+
+3. 尽可能少的使用`plugin`
+
+4. `resolve`
+
+```javascript
+resolve: {
+    extensions: ['.js'],
+    alias: {
+        src: path.resolve(__dirname, '../src')
+    }
+}
+```
+
+`extensions`: 可以让你import模块的时候不写格式，当你不写格式的时候，webpack会默认通过extensions中的格式去相应的文件夹中找
+
+
+
+`alias`:
 
 
 
@@ -1424,11 +1454,62 @@ module: {
 
 
 
+5.dllplugin
 
-gongchengmulu  eslilnt
 
-eslioader
 
-webpack-dev-server overlay
+webpack.dll.js
 
-eslint-loader
+new webpack.DllPlugin({
+
+})
+
+package.json
+
+build:dll 
+
+
+
+web pack.common.js
+
+add-asset-html-webpack-plugin
+
+Dllreferenceplugin({ // 映射文件，页面上就会从对应的dll文件中取模块
+manifest: path.resove()
+
+})
+
+
+
+
+
+6.控制包文件大小
+
+tree-shaking 等
+
+7.thread-loader parallel-webpack happypakc 多进程打包
+
+
+
+8.合理使用sourceMap
+
+
+
+9.结合stats分析打包结果
+
+借助线上或者本地打包分析工具
+
+
+
+10.开发环境内存编译
+
+开发环境的时候不会生成dist文件夹，会直接从内存中读取，因为内存读取比硬盘读取快
+
+
+
+11开发环境无用插件剔除
+
+
+
+
+
