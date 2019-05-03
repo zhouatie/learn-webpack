@@ -1433,7 +1433,7 @@ module: {
 resolve: {
     extensions: ['.js'],
     alias: {
-        src: path.resolve(__dirname, '../src')
+        'src': path.resolve(__dirname, '../src')
     }
 }
 ```
@@ -1442,13 +1442,21 @@ resolve: {
 
 
 
-`alias`:
+`alias`:当你`import`的路径很长的时候，最好使用别名，能简化你的路径。
 
+比如：`import index.js from '../src/a/b/c/index.js'`
 
+设置别名：
 
+```javascript
+resolve: {
+    alias: {
+        '@c': path.resolve(__dirname, '../src/a/b/c')
+    }
+}
+```
 
-
-
+这样你的`import`导入代码就可以改成`import index.js from '@c/index.js'`
 
 
 
@@ -1510,6 +1518,10 @@ tree-shaking 等
 11开发环境无用插件剔除
 
 
+
+
+
+本地打包dll文件。
 
 
 
