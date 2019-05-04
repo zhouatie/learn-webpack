@@ -1417,17 +1417,17 @@ module: {
 
 
 
-1. 跟上技术的迭代
+##### 1. 跟上技术的迭代
 
  - 升级`webpack`版本 `node`版本` npm`等版本
 
-2. 尽可能少的模块上应用`loader`
+##### 2. 尽可能少的模块上应用`loader`
 
  - `include` `exclude`
 
-3. 尽可能少的使用`plugin`
+##### 3. 尽可能少的使用`plugin`
 
-4. `resolve`
+##### 4. `resolve`
 
 ```javascript
 resolve: {
@@ -1460,34 +1460,124 @@ resolve: {
 
 
 
-
-
-5.dllplugin
+##### 5. dllPlugin
 
 
 
-webpack.dll.js
+我们先记录下不使用`dll`打包时间`787ms`：
 
-new webpack.DllPlugin({
+```javascript
+Time: 787ms
+Built at: 2019-05-04 18:32:29
+     Asset       Size  Chunks             Chunk Names
+ bundle.js    861 KiB    main  [emitted]  main
+index.html  396 bytes          [emitted] 
+```
 
+
+
+我们先配置一个用于打包`dll`文件的`webpack`配置，生成打包后的js文件与描述动态链接库的`manifest.json`
+
+```javascript
+const path = require('path')
+const webpack = require('webpack')
+
+module.exports = {
+    entry: {
+        vendor: ['jquery', 'lodash'] // 要打包进vendor的第三方库
+    },
+    output: {
+        filename: '[name].dll.js', // 打包后的文件名
+        path: path.resolve(__dirname, './dll'), // 打包后存储的位置
+        library: '[name]_[hash]' // 挂载到全局变量的变量名，这里要注意 这里的library一定要与DllPlugin中的name一致
+    },
+    plugins: [
+        new webpack.DllPlugin({ // 用于打包出一个个单独的动态链接库文件
+            name: '[name]_[hash]', // 引用output打包出的模块变量名，切记这里必须与output.library一致
+            path: path.join(__dirname, './dll', '[name].manifest.json') // 描述动态链接库的 manifest.json 文件输出时的文件名称
+        })
+    ]
+}
+```
+
+
+
+配置下`package.json`文件 `"build:dll": "webpack --config webpack.dll.config.js"`
+
+执行下 `npm run build:dll`
+
+```javascript
+Time: 548ms
+Built at: 2019-05-04 18:54:09
+        Asset     Size  Chunks             Chunk Names
+vendor.dll.js  157 KiB       0  [emitted]  vendor
+```
+
+
+
+除了打包出`dll`文件之外，还得再主`webpack`配置文件中引入。这里就需要使用到`DllReferencePlugin`。具体配置如下：
+
+```javascript
+new webpack.DllReferencePlugin({
+  manifest: require('./dll/vendor.manifest.json')
+}),
+```
+
+这里的`manifest`：需要配置的是你`dllPlugin`打包出来的`manifest.json`文件。让主`webpack`配置文件通过这个
+
+描述动态链接库`manifest.json`文件，让js使用导入该模块的时候，能直接找到`dll`中打包好后的模块。
+
+
+
+**重点：这里引入的Dllplugin插件，该插件将生成一个manifest.json文件，该文件供webpack.config.js中加入的DllReferencePlugin使用，使我们所编写的源文件能正确地访问到我们所需要的静态资源（运行时依赖包）。**
+
+
+
+看似都配置好了，执行下`npm run build`
+
+
+
+使用`dll`打包后时间：
+
+```javascript
+Time: 471ms
+Built at: 2019-05-04 18:19:49
+     Asset       Size  Chunks             Chunk Names
+ bundle.js   6.43 KiB    main  [emitted]  main
+index.html  182 bytes          [emitted]  
+```
+
+
+
+**直接从最开始的`787ms`降低到`471ms`，当你抽离的dll文件越多，这个效果就越明显。**
+
+
+
+浏览器跑下html页面，会报错
+
+`Uncaught ReferenceError: vendor_e406fbc5b0a0acb4f4e9 is not defined`
+
+
+
+这是因为index.html还需要引入这个dll打包出来的js文件
+
+我们如果每次自己手动引入的话会比较麻烦，如果dll文件非常多的话，就难以想象了。
+
+
+
+这个时候就需要借助`add-asset-html-webpack-plugin`这个包了。
+
+```javascript
+const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin')
+
+new AddAssetHtmlPlugin({
+  filepath: path.resolve(__dirname, './dll/vendor.dll.js')
 })
+```
 
-package.json
+通过这包，webpack会将dll打包出来的js文件通过script标签引入到index.html文件中
 
-build:dll 
-
-
-
-web pack.common.js
-
-add-asset-html-webpack-plugin
-
-Dllreferenceplugin({ // 映射文件，页面上就会从对应的dll文件中取模块
-manifest: path.resove()
-
-})
-
-
+这个时候你在`npm run build`，访问下页面就正常了
 
 
 
