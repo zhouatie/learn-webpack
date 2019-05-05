@@ -1474,11 +1474,12 @@ Built at: 2019-05-04 18:32:29
 index.html  396 bytes          [emitted] 
 ```
 
+接下来我们就尝试使用`dll`技术
 
-
-我们先配置一个用于打包`dll`文件的`webpack`配置，生成打包后的js文件与描述动态链接库的`manifest.json`
+我们先配置一个用于打包`dll`文件的`webpack`配置文件，生成打包后的`js`文件与描述动态链接库的`manifest.json`
 
 ```javascript
+// webpack.dll.config.js
 const path = require('path')
 const webpack = require('webpack')
 
@@ -1502,7 +1503,11 @@ module.exports = {
 
 
 
-配置下`package.json`文件 `"build:dll": "webpack --config webpack.dll.config.js"`
+**重点：这里引入的DllPlugin插件，该插件将生成一个manifest.json文件，该文件供webpack.config.js中加入的DllReferencePlugin使用，使我们所编写的源文件能正确地访问到我们所需要的静态资源（运行时依赖包）。**
+
+
+
+配置下`package.json`文件的`scripts`: `"build:dll": "webpack --config webpack.dll.config.js"`
 
 执行下 `npm run build:dll`
 
@@ -1518,6 +1523,7 @@ vendor.dll.js  157 KiB       0  [emitted]  vendor
 除了打包出`dll`文件之外，还得再主`webpack`配置文件中引入。这里就需要使用到`DllReferencePlugin`。具体配置如下：
 
 ```javascript
+// webpack.config.js
 new webpack.DllReferencePlugin({
   manifest: require('./dll/vendor.manifest.json')
 }),
@@ -1525,15 +1531,11 @@ new webpack.DllReferencePlugin({
 
 这里的`manifest`：需要配置的是你`dllPlugin`打包出来的`manifest.json`文件。让主`webpack`配置文件通过这个
 
-描述动态链接库`manifest.json`文件，让js使用导入该模块的时候，能直接找到`dll`中打包好后的模块。
+描述动态链接库`manifest.json`文件，让`js`导入该模块的时候，直接引用`dll`文件夹中打包好的模块。
 
 
 
-**重点：这里引入的Dllplugin插件，该插件将生成一个manifest.json文件，该文件供webpack.config.js中加入的DllReferencePlugin使用，使我们所编写的源文件能正确地访问到我们所需要的静态资源（运行时依赖包）。**
-
-
-
-看似都配置好了，执行下`npm run build`
+看似都配置好了，接下来执行下命令 `npm run build`
 
 
 
@@ -1549,19 +1551,19 @@ index.html  182 bytes          [emitted]
 
 
 
-**直接从最开始的`787ms`降低到`471ms`，当你抽离的dll文件越多，这个效果就越明显。**
+**直接从最开始的`787ms`降低到`471ms`，当你抽离的第三方模块越多，这个效果就越明显。**
 
 
 
-浏览器跑下html页面，会报错
+浏览器跑下`html`页面，会报错
 
 `Uncaught ReferenceError: vendor_e406fbc5b0a0acb4f4e9 is not defined`
 
 
 
-这是因为index.html还需要引入这个dll打包出来的js文件
+这是因为`index.html`还需要通过`script`标签引入这个`dll`打包出来的`js`文件
 
-我们如果每次自己手动引入的话会比较麻烦，如果dll文件非常多的话，就难以想象了。
+我们如果每次自己手动引入的话会比较麻烦，如果`dll`文件非常多的话，就难以想象了。
 
 
 
@@ -1575,43 +1577,45 @@ new AddAssetHtmlPlugin({
 })
 ```
 
-通过这包，webpack会将dll打包出来的js文件通过script标签引入到index.html文件中
+通过这包，`webpack`会将`dll`打包出来的`js`文件通过`script`标签引入到`index.html`文件中
 
 这个时候你在`npm run build`，访问下页面就正常了
 
 
 
-6.控制包文件大小
+
+
+##### 6. 控制包文件大小
 
 tree-shaking 等
 
-7.thread-loader parallel-webpack happypakc 多进程打包
+
+
+##### 7. thread-loader parallel-webpack happypack等多进程打包
 
 
 
-8.合理使用sourceMap
+##### 8. 合理使用sourceMap
 
 
 
-9.结合stats分析打包结果
+##### 9. 结合stats分析打包结果
 
 借助线上或者本地打包分析工具
 
 
 
-10.开发环境内存编译
+##### 10. 开发环境内存编译
 
 开发环境的时候不会生成dist文件夹，会直接从内存中读取，因为内存读取比硬盘读取快
 
 
 
-11开发环境无用插件剔除
+##### 11. 开发环境无用插件剔除
 
 
 
 
-
-本地打包dll文件。
 
 
 
