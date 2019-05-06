@@ -1623,59 +1623,151 @@ tree-shaking 等
 
 
 
+```javascript
+// index.js
+console.log('hello, atie')
+```
+
+
+
+配置`webpack.config.js`
+
+```javascript
 // webpack.config.js
 
-rules: [
+module: {
+  rules: [
+    {
+      test: /\.js$/,
+      include: /src/,
+      loader: path.resolve(__dirname, './loaders/replaceLoader.js')
+    }
+  ]
+},
+```
 
-{
 
-​	test: /\.js$/,
 
-loader: path.resolve(__dirname, './loaders/replaceLoaders.js')
-
-}]
-
-module.exports = function () {
-
+```javascript
+// 函数不能使用箭头函数
+module.exports = function(source) {
+    console.log(source, 'source')
+    return source.replace('atie', 'world')
 }
+```
+
+`loader`文件其实就是导出一个函数，`source`就是`webpack`打包出的`js`字符串。这里的`loader`就是将上面的`console.log('hello, atie')`替换为`console.log('hello, world')`
+
+打包下代码，不出所料。控制台就会打印出`hello, world`
 
 
 
-loader-utils
+当你想要给loader传参时，可配置如下
 
+```javascript
+module: {
+  rules: [
+    {
+      test: /\.js$/,
+      include: /src/,
+      use: [{
+        loader: path.resolve(__dirname, './loaders/replaceLoader.js'),
+        options: {
+          name: 'haha'
+        }
+      }]
+    }
+  ]
+},
+```
 
+通过给`loader`添加`options`
 
-this.callbacks
+这样`loader`中就可以通过`this.query`获取该参数了
 
-
-
-异步调用
-
-this.async
-
-
-
-const callback = this.async()
-
-
-
-settimeout(() => {
-
-callback(result)
-
-})
-
-
-
-use中的loader执行顺序，先右后左，先下后上
-
-
-
-resolveLoader： {
-
-modules: ['node_Modules', './loaders']
-
+```javascript
+module.exports = function(source) {
+  	// 控制台输出：console.log('hello atie') { name: 'haha' } source
+    console.log(source, this.query, 'source')
+    return source.replace('atie', 'world')
 }
+```
+
+当然变量不一定非要通过`this.query`来获取
+
+可通过`loader-utils`这个包来获取传入的变量
+
+安装: `npm i loader-utils -D`
+
+```javascript
+const loaderUtils = require('loader-utils')
+
+// 函数不能使用箭头函数
+module.exports = function(source) {
+    // console.log(source, this.query, 'source')
+    const options = loaderUtils.getOptions(this)
+    console.log(options, 'options') // { name: 'haha' } 'options'
+    return source.replace('atie', 'world')
+}
+```
+
+打印出来的与上面`this.query`一致
+
+上面都是直接通过`return`返回的，那么我们还有没有其他方法返回`loader`翻译后的代码呢？`
+
+这里就会用到`callback`
+
+```javascript
+this.callback(
+  err: Error | null,
+  content: string | Buffer,
+  sourceMap?: SourceMap,
+  meta?: any
+);
+```
+
+上面的代码就可以改写成
+
+```javascript
+module.exports = function(source) {
+    const options = loaderUtils.getOptions(this)
+    const result = source.replace('atie', options.name)
+    this.callback(null, result)
+}
+```
+
+`callback`优势在于它可以传递多余的参数
+
+
+
+```javascript
+module.exports = function(source) {
+    setTimeout(() => {
+        return source.replace('atie', 'world')
+    }, 1000)
+}
+```
+
+当我们把`return`包到异步方法里，打包的时候就会报错，那么我们该怎么办呢？
+
+这个时候就需要用到`this.async()`
+
+```javascript
+module.exports = function(source) {
+    const callback = this.async()
+    setTimeout(() => {
+        callback(null, source.replace('atie', 'world'))
+    }, 2000)
+}
+```
+
+通过调用`this.async()`返回的`callback`方法来返回结果
+
+
+
+**use中的loader执行顺序，先右后左，先下后上**
+
+
 
 
 
