@@ -1615,7 +1615,67 @@ tree-shaking 等
 
 
 
+### 深入
 
+
+
+#### 编写loader
+
+
+
+// webpack.config.js
+
+rules: [
+
+{
+
+​	test: /\.js$/,
+
+loader: path.resolve(__dirname, './loaders/replaceLoaders.js')
+
+}]
+
+module.exports = function () {
+
+}
+
+
+
+loader-utils
+
+
+
+this.callbacks
+
+
+
+异步调用
+
+this.async
+
+
+
+const callback = this.async()
+
+
+
+settimeout(() => {
+
+callback(result)
+
+})
+
+
+
+use中的loader执行顺序，先右后左，先下后上
+
+
+
+resolveLoader： {
+
+modules: ['node_Modules', './loaders']
+
+}
 
 
 
