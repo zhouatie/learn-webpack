@@ -1771,11 +1771,135 @@ module.exports = function(source) {
 
 #### 编写plugin
 
+在根目录下新建`plugins`文件夹，并新建`copyright-webpack-plugin.js`，内容如下：
+
+```javascript
+class Copyright {
+    constructor() {
+        console.log('this is plugin')
+    }
+    apply(compiler) {
+    }
+}
+module.exports = Copyright
+```
+
+注意：apply这个方法必须存在，不然插件被执行的时候会报错。
+
+配置`webpack.config.js`,如下：
+
+```javascript
+const Copyrgiht = require('./plugins/copyright-webpack-plugin.js')
+
+...
+
+plugins: [
+  new Copyrgiht()
+]
+```
+
+执行下打包命令后
+
+```javascript
+this is plugin
+Hash: 479baeba2207182096f8
+Version: webpack 4.30.0
+Time: 615ms
+Built at: 2019-05-08 23:05:08
+     Asset       Size  Chunks             Chunk Names
+ bundle.js   3.77 KiB    main  [emitted]  main
+index.html  182 bytes          [emitted]  
+```
+
+控制台打印出了`this is plugin`
 
 
 
+接下来，我们继续探索插件的奥秘
 
 
+
+在使用插件的时候还可以传参
+
+```javascript
+// webpack.config.js
+plugins: [
+  new Copyrgiht({
+    name: 'atie'
+  })
+]
+```
+
+
+
+```javascript
+class Copyright {
+    constructor(options) {
+        // console.log(options, 'this is plugin')
+      	this.options = options
+    }
+    apply(compiler) {
+      	console.log(this.options)
+    }
+}
+```
+
+执行下打包命令：
+
+```javascript
+{ name: 'atie' }
+Hash: 479baeba2207182096f8
+Version: webpack 4.30.0
+Time: 742ms
+Built at: 2019-05-08 23:24:10
+     Asset       Size  Chunks             Chunk Names
+ bundle.js   3.77 KiB    main  [emitted]  main
+index.html  182 bytes          [emitted]
+```
+
+控制就会输出 `{name: 'atie'}`
+
+
+
+`webpack`在调用`apply`会传递一个`compiler`参数，这个参数可以做很多事情，具体可以参考`webpack`官网
+
+
+
+这里介绍下钩子
+
+```javascript
+class Copyright {
+    apply(compiler) {
+        compiler.hooks.emit.tapAsync('Copyright', (compilation,callback) => {
+            console.log(compilation.assets, '以具有延迟的异步方式触及 run 钩子。');
+            compilation.assets['copyright.txt'] = {
+                source: function() {
+                    return 'copyright by atie'
+                },
+                size: function() {
+                    return 17
+                }
+            }
+            callback()
+        })
+    }
+}
+
+module.exports = Copyright
+```
+
+该钩子是在文件生成前触发的。我们在文件生成前，在`asset`对象上在加一个文件对象
+
+打包之后
+
+```javascript
+.
+├── bundle.js
+├── copyright.txt
+└── index.html
+```
+
+可以看到多了一个`copyright.txt`，也就是我们上面创建的文件。点开该文件还会看到里面的内容正是`copyright by atie`
 
 
 
