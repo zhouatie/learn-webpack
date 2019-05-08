@@ -11,6 +11,8 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin(),
         new CleanWebpackPlugin(),
-        new Copyrgiht()
+        new Copyrgiht({
+            name: 'atie'
+        })
     ]
 }
