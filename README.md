@@ -1,22 +1,20 @@
-### npm
+### 小知识
 
 `npm info webpack` 查看webpack的历史版本信息等
 
 `npm init -y` 跳过那些选项，默认
 
+全局安装的`webpack`  ： `webpack index.js` 打包
 
+项目中安装的`webpack`：` npx webpack index.js` 打包
 
-全局安装的webpack  ： webpack index.js 打包
-
-local安装的webpack： npx webpack index.js 打包
-
-script中脚本打包 ： npm run build
+`script`中脚本打包 ： `npm run build`
 
 命令行中打包：`npx webpack index.js -o bundle.js` 入口是`index.js`, 出口是`bundle.js`
 
-webpack4设置mode：production 会压缩代码 development 就不压缩代码
+`webpack4`设置`mode：production` 会压缩代码 `development` 就不压缩代码
 
-打包 output里面[name].js loader中的name变量 其实就是entry:{main: index.js} 中的key =》 main
+打包` output`里面`[name].js loader`中的`name`变量 其实就是`entry:{main: index.js} 中的key => main`
 
 
 
@@ -1900,6 +1898,8 @@ module.exports = Copyright
 ```
 
 可以看到多了一个`copyright.txt`，也就是我们上面创建的文件。点开该文件还会看到里面的内容正是`copyright by atie`
+
+
 
 
 
