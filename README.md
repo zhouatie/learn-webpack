@@ -20,13 +20,13 @@
 
 ### source-map
 
-devtool: source-map
+`devtool: source-map`
 
-`source-map` dist文件夹里会多生成个map后缀文件，这样页面报错的时候，点击报错后面的地址，会跳转到代码写的地方。而不会跳转到打包后的代码里。
+`source-map`: `dist`文件夹里会多生成个`map`后缀文件，这样页面报错的时候，点击报错后面的地址，会跳转到代码写的地方。而不会跳转到打包后的代码里。
 
 `inline-source-map`: 不会新生成.map文件，会插入到打包的文件底部
 
-`cheap-inline-source-map`:  因为`inline-source-map`报错会告诉你第几行第几个字符。前面加上cheap的话 只会告诉你第几行
+`cheap-inline-source-map`:  因为`inline-source-map`报错会告诉你第几行第几个字符。前面加上`cheap`的话 只会告诉你第几行
 
 `cheap-module-inline-source-map`: 本来map只会映射打包出来的index.js跟业务代码中的关系。第三方引入库报错映射不到。中间加了module这个参数就可以了。比如`loader`也会有`source-map`
 
@@ -40,13 +40,67 @@ devtool: source-map
 
 ### loader
 
-`import style from './index.css'`
+```javascript
+// style.css
+body {
+    color: red;
+}
+```
 
-`style-loader` 的`options` 添加`modules ：true`
+当你想给项目添加样式的时候，`import ./style.css`导入`css`，并执行打包命令的时候。页面并报错
 
-`dom.classList.add(style.avatar)` 可以让这个dom独立拥有这个样式
+```javascript
+ERROR in ./style.css 1:5
+Module parse failed: Unexpected token (1:5)
+You may need an appropriate loader to handle this file type.
+```
 
-loader执行顺序是从下到上，右到左。
+这个时候就需要使用`loader`来编译了。
+
+安装:`npm i style-loader css-loader -D`
+
+为什么还需要安装`style-loader`呢？因为`style-loader`会将你的样式通过`style`标签插入到页面中
+
+配置`webpack.config.js`
+
+```javascript
+// webpack.config.js
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+    mode: "development",
+    entry: './index.js',
+    output: {
+        filename: 'bundle.js'
+    },
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
+            }
+        ]
+    },
+    plugins: [
+        new HtmlWebpackPlugin()
+    ]
+}
+```
+
+上面使用了`HtmlWebpackPlugin`是因为我用它来自动生成`index.html`方便页面访问
+
+```javascript
+// package.json
+"scripts": {
+  "build": "webpack --config webpack.config.js"
+},
+```
+
+
+
+执行`npm run build`进行打包，访问`dist`目录下的`index.html`,可以看到页面显示成功。
+
+**`loader`执行顺序是从下到上，右到左。**
 
 
 
@@ -60,7 +114,7 @@ loader执行顺序是从下到上，右到左。
 
 `webpack-dev-server`会自动更新当前页面
 
-`webpack-dev-server`, 现在的`webpack-dev-server`比以前好多了 vue-cli3 和react都是用这个了
+`webpack-dev-server`, 现在的`webpack-dev-server`比以前好多了 `vue-cli3` 和`react`都是用这个了
 
 ```javascript
 devServer: {
@@ -75,7 +129,7 @@ devServer: {
 
 `npm install express webpack-dev-middleware -D`
 
-在output中添加publicPath
+在`output`中添加`publicPath`
 
 ```javascript
 const express = require('express')
